@@ -99,6 +99,6 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	counter++
 
 	log.Print("The hello handler was called for ", counter)
-	fmt.Fprintf(w, "counter:%d\n", counter)
+	fmt.Fprintf(w, "count:%d\n", counter)
 	//fmt.Fprint(w, "\n" + http.StatusText(http.StatusOK))
 }
