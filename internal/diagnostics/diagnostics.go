@@ -11,7 +11,7 @@ import (
 func NewDiagnostics() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/healthz", healthz)
-	router.HandleFunc("/ready", ready)
+	router.HandleFunc("/readyz", readyz)
 	return router
 }
 
@@ -20,7 +20,7 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, http.StatusText(http.StatusOK))
 }
 
-func ready(w http.ResponseWriter, r *http.Request) {
+func readyz(w http.ResponseWriter, r *http.Request) {
 	log.Print("The ready handler was called")
 	fmt.Fprint(w, http.StatusText(http.StatusOK))
 }
