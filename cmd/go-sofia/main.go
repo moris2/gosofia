@@ -1,14 +1,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/moris2/gosofia/internal/diagnostics"
 )
+
+type serverConf struct {
+	port   string
+	router http.Handler
+	name   string
+}
+
+var counter = 1
 
 func main() {
 	log.Print("Starting the application...")
@@ -26,36 +36,61 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", hello)
 
+	diagnostics := diagnostics.NewDiagnostics()
+
 	possibleErrors := make(chan error, 2)
 
-	go func() {
-		log.Print("The application server is preparing to handle connections...")
-		server := &http.Server{
-			Addr:    ":" + blPort,
-			Handler: router,
-		}
-		err := server.ListenAndServe()
-		if err != nil {
-			possibleErrors <- err
-		}
-	}()
+	configurations := []serverConf{
+		{
+			port:   blPort,
+			router: router,
+			name:   "application server",
+		},
+		{
 
-	go func() {
-		log.Print("The diagnostics server is preparing to handle connections...")
-		diagnostics := diagnostics.NewDiagnostics()
-		err := http.ListenAndServe(":"+diagPort, diagnostics)
-		if err != nil {
-			possibleErrors <- err
-		}
-	}()
+			port:   diagPort,
+			router: diagnostics,
+			name:   "diagnostics server",
+		},
+	}
+
+	servers := make([]*http.Server, 2)
+
+	for i, c := range configurations {
+		go func(conf serverConf, i int) {
+			log.Printf("The %s is preparing to handle connections...", conf.name)
+			servers[i] = &http.Server{
+				Addr:    ":" + conf.port,
+				Handler: conf.router,
+			}
+			err := servers[i].ListenAndServe()
+			if err != nil {
+				possibleErrors <- err
+			}
+		}(c, i)
+	}
 
 	select {
 	case err := <-possibleErrors:
+		for _, s := range servers {
+			timeout := 5 * time.Second
+			log.Printf("\nShutdown with timeout: %s\n", timeout)
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			defer cancel()
+			customError := s.Shutdown(ctx)
+			if customError != nil {
+				fmt.Println(customError)
+			}
+			log.Printf("Server gracefully stopped")
+		}
 		log.Fatal(err)
 	}
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
-	log.Print("The hello handler was called")
-	fmt.Fprint(w, http.StatusText(http.StatusOK))
+	counter++
+	log.Print("The hello handler was called for ", counter)
+
+	fmt.Fprint(w, counter)
+	//fmt.Fprint(w, "\n" + http.StatusText(http.StatusOK))
 }
