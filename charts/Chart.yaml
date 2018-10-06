@@ -1,9 +1,9 @@
-name: go-sofia
+name: gosofia
 description: A Helm charts for Kubernetes application
 version: 0.0.1
 home: https://k8s.community/
 sources:
-  - https://github.com/moris2/go-sofia
+  - https://github.com/moris2/gosofia
 maintainers:
   - name: Kubernetes Community Authors
     email: k8s.community@gmail.com

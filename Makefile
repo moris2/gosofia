@@ -2,9 +2,9 @@
 GOOS?=linux
 GOARCH?=amd64
 
-PROJECT?=github.com/moris2/go-sofia
-BUILD_PATH?=cmd/go-sofia
-APP?=go-sofia
+PROJECT?=github.com/moris2/gosofia
+BUILD_PATH?=cmd/gosofia
+APP?=gosofia
 
 PORT?=80
 DIAG_PORT?=8080
@@ -28,6 +28,7 @@ push: container
 	docker push $(CONTAINER_IMAGE):$(RELEASE)
 
 deploy: push
+
 	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts \
 		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} --version=${RELEASE} -i --wait \
 		--set image.registry=${REGISTRY} --set image.name=${CONTAINER_NAME} --set image.tag=${RELEASE}
