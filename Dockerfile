@@ -10,7 +10,7 @@ WORKDIR /go/src/github.com/moris2/gosofia
 
 # build the binary with go build
 RUN CGO_ENABLED=0 go build \
-	-o bin/go-sofia github.com/moris2/gosofia/cmd/gosofia
+	-o bin/gosofia github.com/moris2/gosofia/cmd/gosofia
 
 # Stage 2. Run the binary
 FROM scratch
