@@ -2,6 +2,7 @@ package diagnostics
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -9,15 +10,17 @@ import (
 
 func NewDiagnostics() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/healthz", helthz)
+	router.HandleFunc("/healthz", healthz)
 	router.HandleFunc("/ready", ready)
 	return router
 }
 
-func helthz(w http.ResponseWriter, r *http.Request) {
+func healthz(w http.ResponseWriter, r *http.Request) {
+	log.Print("The healthz handler was called")
 	fmt.Fprint(w, http.StatusText(http.StatusOK))
 }
 
 func ready(w http.ResponseWriter, r *http.Request) {
+	log.Print("The ready handler was called")
 	fmt.Fprint(w, http.StatusText(http.StatusOK))
 }

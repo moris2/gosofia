@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/rumyantseva/go-sofia/internal/diagnostics"
+	"github.com/moris2/gosofia/internal/diagnostics"
 )
 
 func main() {
@@ -26,20 +26,36 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", hello)
 
+	possibleErrors := make(chan error, 2)
+
 	go func() {
-		err := http.ListenAndServe(":"+blPort, router)
+		log.Print("The application server is preparing to handle connections...")
+		server := &http.Server{
+			Addr:    ":" + blPort,
+			Handler: router,
+		}
+		err := server.ListenAndServe()
 		if err != nil {
-			log.Fatal(err)
+			possibleErrors <- err
 		}
 	}()
 
-	diagnostics := diagnostics.NewDiagnostics()
-	err := http.ListenAndServe(":"+diagPort, diagnostics)
-	if err != nil {
+	go func() {
+		log.Print("The diagnostics server is preparing to handle connections...")
+		diagnostics := diagnostics.NewDiagnostics()
+		err := http.ListenAndServe(":"+diagPort, diagnostics)
+		if err != nil {
+			possibleErrors <- err
+		}
+	}()
+
+	select {
+	case err := <-possibleErrors:
 		log.Fatal(err)
 	}
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
+	log.Print("The hello handler was called")
 	fmt.Fprint(w, http.StatusText(http.StatusOK))
 }
