@@ -10,7 +10,7 @@ PORT?=80
 DIAG_PORT?=8080
 
 # Current version and commit
-RELEASE?=0.0.1
+RELEASE?=0.0.2
 COMMIT?=$(shell git rev-parse --short HEAD)
 BUILD_TIME?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
@@ -27,10 +27,7 @@ container:
 push: container
 	docker push $(CONTAINER_IMAGE):$(RELEASE)
 
-list:push
-    helm list -a
-    
-deploy: list
+deploy: push
 	helm upgrade ${CONTAINER_NAME} -f charts/${VALUES}.yaml charts \
 		--kube-context ${KUBE_CONTEXT} --namespace ${NAMESPACE} --version=${RELEASE} -i --wait \
 		--set image.registry=${REGISTRY} --set image.name=${CONTAINER_NAME} --set image.tag=${RELEASE}
