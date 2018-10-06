@@ -91,7 +91,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		log.Printf("Server gracefully stopped", )
+		log.Printf("Server gracefully stopped ", )
 	}
 }
 
