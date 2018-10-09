@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+
 	"net/http"
+
 	"os"
 	"os/signal"
 	"syscall"
@@ -91,7 +93,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		log.Printf("Server gracefully stopped ", )
+		log.Printf("Server gracefully stopped ")
 	}
 }
 
